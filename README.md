@@ -30,7 +30,34 @@ In the request body, place your cursor inside the `requestTime` value and select
 { "requestTime": "${[ payok.timestamp() ]}" }
 ```
 
-The timestamp is cached for 10 seconds so the value in the body and the signed body always match.
+---
+
+### `payok.uuid`
+
+Generates a UUID for fields like `merchantOrderId` that must be unique per request.
+
+```json
+{ "merchantOrderId": "${[ payok.uuid() ]}" }
+```
+
+---
+
+## How caching works
+
+`payok.signature` expires both caches before rendering the body. This guarantees:
+
+1. **Uniqueness** — each request send gets a fresh UUID and timestamp, even when requests are sent in rapid succession.
+2. **Consistency** — the body used to compute the signature is identical to the body sent in the request.
+
+```
+payok.signature renders
+  → expires UUID + timestamp caches
+  → renders body → payok.uuid() and payok.timestamp() generate fresh values and cache them
+  → signs body with those values
+
+Yaak sends actual request
+  → renders body → payok.uuid() and payok.timestamp() return cached values  ✓
+```
 
 ---
 
