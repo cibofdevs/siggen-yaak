@@ -1,5 +1,5 @@
 import type { PluginDefinition } from '@yaakapp/api';
-import { createSign } from 'node:crypto';
+import { createSign, randomUUID } from 'node:crypto';
 
 function buildPrivateKeyPem(keyInput: string): string {
   const stripped = keyInput
@@ -24,6 +24,7 @@ function extractBodyText(body: Record<string, any>): string | null {
 }
 
 const TS_CACHE_KEY = 'payok_ts';
+const UUID_CACHE_KEY = 'payok_uuid';
 const TS_CACHE_TTL = 10_000;
 
 export const plugin: PluginDefinition = {
@@ -92,6 +93,26 @@ export const plugin: PluginDefinition = {
         const ts = new Date().toISOString();
         await ctx.store.set(TS_CACHE_KEY, { ts, at: now });
         return ts;
+      },
+    },
+    {
+      name: 'payok.uuid',
+      description: 'Generate a UUID that stays consistent within a single request cycle, so payok.signature and the request body use the same value.',
+      previewType: 'live',
+      args: [],
+      // Caches the UUID for 10 seconds — the same window used by payok.timestamp.
+      // Both the signature render pass and the body render pass happen within
+      // milliseconds of each other, so they receive the same UUID. A new UUID
+      // is generated on the next send after the TTL expires.
+      async onRender(ctx) {
+        const now = Date.now();
+        const cached = await ctx.store.get<{ id: string; at: number }>(UUID_CACHE_KEY);
+        if (cached && (now - cached.at) < TS_CACHE_TTL) {
+          return cached.id;
+        }
+        const id = randomUUID();
+        await ctx.store.set(UUID_CACHE_KEY, { id, at: now });
+        return id;
       },
     },
   ],
