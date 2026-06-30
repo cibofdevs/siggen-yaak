@@ -1,0 +1,32 @@
+{
+  "name": "@cibofdevs/payok-siggen",
+  "version": "1.0.0",
+  "description": "PAYOK Signature Generator plugin for Yaak HTTP Client",
+  "displayName": "PAYOK Signature Generator",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "yaakcli build",
+    "dev": "yaakcli dev",
+    "watch": "tsc --watch"
+  },
+  "keywords": [
+    "yaak",
+    "yaak-plugin",
+    "payok",
+    "signature",
+    "rsa",
+    "sha256"
+  ],
+  "author": "Ahmad Wijaya",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cibofdevs/siggen-yaak"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.2",
+    "@yaakapp/api": "^0.8.3",
+    "@yaakapp/cli": "latest",
+    "typescript": "^5.0.0"
+  }
+}
