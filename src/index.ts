@@ -65,6 +65,12 @@ export const plugin: PluginDefinition = {
         const rawBodyText = extractBodyText(rawRequest.body);
         if (!rawBodyText) return null;
 
+        // Expire caches so each send gets a fresh timestamp and UUID.
+        // payok.timestamp/payok.uuid will regenerate values on the next call and
+        // cache them, so the subsequent actual body render reuses the same values.
+        await ctx.store.set(TS_CACHE_KEY, { ts: '', at: 0 });
+        await ctx.store.set(UUID_CACHE_KEY, { id: '', at: 0 });
+
         // Render only the body string — ctx.templates.render resolves {{ }} tags
         // without triggering a full request render (no infinite recursion)
         const renderedBody = await ctx.templates.render({
